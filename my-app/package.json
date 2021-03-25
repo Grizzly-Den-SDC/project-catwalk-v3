@@ -11,9 +11,11 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "cors": "^2.8.5",
+    "k6": "0.0.0",
     "material-ui-search-bar": "^1.0.0",
     "moment": "^2.29.1",
     "nodemon": "^2.0.7",
+    "pg": "^8.5.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-bootstrap": "^1.5.1",
@@ -35,7 +37,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "startJest": "jest --collectCoverage",
-    "watch": "webpack -w"
+    "watch": "webpack -w",
+    "schema": "psql products -U malcolmmarshall <database/schema.sql "
   },
   "eslintConfig": {
     "extends": [

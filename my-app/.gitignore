@@ -24,3 +24,7 @@ yarn-error.log*
 
 # /public/app.js
 /config
+
+#  ec2
+/database/config.js
+/server/config/config.js

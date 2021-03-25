@@ -5,15 +5,17 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const cors = require('cors');
-const config = require('../config/config.js')
+const config = require('./config/config.js');
 
 /**********************change this url for development or production (aws) server**********************************/
 const url = 'http://localhost:8080';
+const db = require('../database/index.js');
+
 // 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-bld'
 
 /************************************************************************************* */
 //they have both a build and a public folder.  Can only change things with public.
-// all build stuff is commented out 
+// all build stuff is commented out
 // app.use(express.static(path.join(__dirname, '../build')));
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -47,30 +49,69 @@ app.get('/:id(\\d+)/', (req, res) => {
 
 //any get reqeust, append url that is different
 app.get('*', (req, res) => {
-  console.log(req.url)
+  // console.log(req.url)
   if (req.url.indexOf('questions') !== -1) {
-    console.log('questions requests: ', req.url)
-    axios({
-      method: 'get',
-      headers: { 'Authorization': config.config },
-      url: `${url}${req.url}`,
-    })
+    // console.log('questions requests: ', req.url)
+    // axios({
+    //   method: 'get',
+    //   headers: { 'Authorization': config.config },
+    //   url: `${url}${req.url}`,
+    // })
 
-      .then(response => {
-        // console.log(response);
-        // console.log(response.data)
-        res.status(200).send(response.data);
-      })
-      .catch(err => {
-        //console.log(err);
-        res.status(err.response.status).send(err.response.data);
-      });
+    //   .then(response => {
+    //     // console.log(response);
+    //     // console.log(response.data)
+    //     res.status(200).send(response.data);
+    //   })
+    //   .catch(err => {
+    //     //console.log(err);
+    //     res.status(err.response.status).send(err.response.data);
+    //   });
   }
   else if (req.url.indexOf('products') !== -1) {
     //axios get requests to products server
 
-  } else if (req.url.indexOf('reviews') !== -1) {
-    //axios get requests to reviews server
+    if (req.url.indexOf('styles') !== -1) {
+
+      let id = req.query.product_id.slice(0, -7)
+
+      console.log({id});
+      db.getProducts(`SELECT * FROM styles WHERE productId=${id}`)
+      .then((results) => {
+        res.send(results)
+      })
+      .catch(err => res.send(err))
+    } else {
+      const query = `select json_build_object(
+        'product_id', products.product_id,
+        'name', products.name,
+        'slogan', products.slogan,
+        'description', products.description,
+        'category', products.category,
+        'default_price', products.default_price,
+        'features',
+        (select json_agg(
+          json_build_object(
+            'id', features.id,
+            'product_id', features.product_id,
+            'feature', features.feature,
+            'value', features.value))
+             from features where features.product_id=products.product_id))
+             from products where products.product_id=${req.query.product_id};`;
+
+      db.getProducts(query)
+        .then((results) => {
+          res.status(200).send(results)
+        })
+        .catch((err) => res.status(400).send(err))
+    }
+
+
+    // Promise.all([db.getProducts(queryProducts), db.getProducts(queryFeatures)])
+    //   .then((results) => res.status(200).send(results))
+    //   .catch(err => res.status(400).send(err))
+
+  } else if (req.url.indexOf('styles') !== -1) {
 
   }
 
@@ -175,3 +216,21 @@ app.put(`/qa/answers/:answer_id/report`, (req, res) => {
       console.log('ERROR WITH ANSWER IS REPORTED: ', err)
     })
 })
+
+// select coalesce(json_build_object(
+//   'product_id', products.product_id,
+//   'name', products.name,
+//   'slogan', products.slogan,
+//   'description', products.description,
+//   'category', products.category,
+//   'default_price', products.default_price,
+//   'features',
+//   (select coalesce(json_build_object(
+//       'styles'.style_id,
+//       'productId', styles.styles.productId,
+//       'name', styles.name,
+//       'sale_price', styles.sale_price,
+//       'original_price', styles.original_price,
+//       'default_style', styles.default_style)),‘{}‘::json)
+//        from styles where styles.productId=products.products_id), ‘{}‘::json)
+//        from products where products.product_id=${req.query.product_id};
