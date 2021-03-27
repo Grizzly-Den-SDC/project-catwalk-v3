@@ -71,17 +71,17 @@ app.get('*', (req, res) => {
   else if (req.url.indexOf('products') !== -1) {
     //axios get requests to products server
 
-    if (req.url.indexOf('styles') !== -1) {
+    // if (req.url.indexOf('styles') !== -1) {
 
-      let id = req.query.product_id.slice(0, -7)
+    //   let id = req.query.product_id.slice(0, -7)
 
-      console.log({id});
-      db.getProducts(`SELECT * FROM styles WHERE productId=${id}`)
-      .then((results) => {
-        res.send(results)
-      })
-      .catch(err => res.send(err))
-    } else {
+    //   console.log({id});
+    //   db.getProducts(`SELECT * FROM styles WHERE productId=${id}`)
+    //   .then((results) => {
+    //     res.send(results)
+    //   })
+    //   .catch(err => res.send(err))
+    // } else {
       const query = `select json_build_object(
         'product_id', products.product_id,
         'name', products.name,
@@ -104,7 +104,7 @@ app.get('*', (req, res) => {
           res.status(200).send(results)
         })
         .catch((err) => res.status(400).send(err))
-    }
+    // }
 
 
     // Promise.all([db.getProducts(queryProducts), db.getProducts(queryFeatures)])
